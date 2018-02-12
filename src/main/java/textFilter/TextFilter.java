@@ -1,21 +1,59 @@
 package textFilter;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class TextFilter {
 
     public static void main(String[] args) {
+        new TextFilter().executeTextFiltering(args);
+    }
 
+    private void executeTextFiltering(String[] args) {
+        System.out.println("Enter \'exit\' for quite:");
+        Scanner scanner = new Scanner(System.in);
         List<String> strings = new LinkedList<>();
-        getStringsFromTextInputStream(strings);
+        boolean exit;
+        while (true) {
+            try {
+                System.out.println("Enter strings : ");
 
+                exit = getStringsFromInputText(scanner, strings);
 
+                if (exit) {
+                    break;
+                }
+
+                filteringText(args, strings);
+
+                System.out.println();
+                strings.clear();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+        scanner.close();
+    }
+
+    private boolean getStringsFromInputText(Scanner scanner, List<String> strings) {
+        while (true) {
+            String input = scanner.nextLine();
+            if (input.equals("exit"))
+                return true;
+
+            if (input.equals(""))
+                break;
+
+            strings.add(input.endsWith(";") ? input.substring(0, input.length() - 1) : input);
+        }
+        return false;
+    }
+
+    private void filteringText(String[] args, List<String> strings) {
+        System.out.println("Output : ");
         for (String line : strings) {
             boolean exist;
             String[] words = line.split(" ");
@@ -26,12 +64,10 @@ public class TextFilter {
                     break;
                 }
             }
-
         }
-
     }
 
-    private static boolean isWordExistInArgs(String word, String[] param) {
+    private boolean isWordExistInArgs(String word, String[] param) {
         for (String arg : param) {
 
             if (isValidRegex(arg)) {
@@ -60,7 +96,7 @@ public class TextFilter {
         return false;
     }
 
-    private static boolean isValidRegex(String arg) {
+    private boolean isValidRegex(String arg) {
         try {
             Pattern.compile(arg);
             return true;
@@ -68,21 +104,4 @@ public class TextFilter {
             return false;
         }
     }
-
-    private static void getStringsFromTextInputStream(List<String> strings) {
-        System.out.println("Strings : ");
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
-            while (true) {
-                String input = br.readLine();
-                if ("".equals(input)) {
-                    break;
-                }
-                strings.add(input.endsWith(";") ? input.substring(0, input.length() - 1) : input);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
 }
