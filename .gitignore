@@ -1,3 +1,8 @@
+#ignore idea
+gpSolutionsTask2.iml
+.idea/
+target/
+
 # Compiled class file
 *.class
 
