@@ -39,15 +39,15 @@ public class Calculator {
     }
 
 
-    private BigDecimal calculate(String input) {
-        String output = getExpression(input);
-        return counting(output);
+    private BigDecimal calculate(String inputDataString) {
+        String reversePolishNotation = computeReversePolishNotation(inputDataString);
+        return counting(reversePolishNotation);
     }
 
 
-    private String getExpression(String input) {
+    private String computeReversePolishNotation(String input) {
         StringBuilder output = new StringBuilder();
-        Stack<Character> operStack = new Stack<>();
+        Stack<Character> operations = new Stack<>();
 
         for (int i = 0; i < input.length(); i++) {
 
@@ -64,7 +64,7 @@ public class Calculator {
                 while (i < input.length() && !isDelimeter(input.charAt(i)) && !isOperator(input.charAt(i))) {
 
                     if (!Character.isDigit(input.charAt(i)) && input.charAt(i) != '.' && input.charAt(i) != ',') {
-                        throw new IllegalArgumentException("Invalid data");
+                        throw new IllegalArgumentException("Not valid input data. invalid number");
                     }
 
                     output.append(input.charAt(i));
@@ -74,44 +74,49 @@ public class Calculator {
                 output.append(" ");
                 i--;
 
-                int j = i + 1;
-                while (j < input.length() && isDelimeter(input.charAt(j))) {
-                    j++;
-                }
-
-                if (j < input.length() && !isOperator(input.charAt(j))) {
-                    throw new IllegalArgumentException("Invalid data");
-                }
+                checkWhitespacesInsideNumber(input, i);
             }
 
 
             if (isOperator(input.charAt(i))) {
-                if (input.charAt(i) == '(')
-                    operStack.push(input.charAt(i));
-                else if (input.charAt(i) == ')') {
+                char operator = input.charAt(i);
+                if (operator == '(')
+                    operations.push(operator);
+                else if (operator == ')') {
 
-                    char s = operStack.pop();
+                    char s = operations.pop();
 
                     while (s != '(') {
                         output.append(String.valueOf(s)).append(' ');
-                        s = operStack.pop();
+                        s = operations.pop();
                     }
                 } else {
-                    if (operStack.size() > 0)
-                        if (getPriority(input.charAt(i)) <= getPriority(operStack.peek()))
-                            output.append(operStack.pop().toString()).append(" ");
+                    if (operations.size() > 0)
+                        if (getPriority(operator) <= getPriority(operations.peek()))
+                            output.append(operations.pop().toString()).append(" ");
 
 
-                    operStack.push(input.charAt(i));
+                    operations.push(operator);
                 }
             }
         }
 
 
-        while (operStack.size() > 0)
-            output.append(operStack.pop()).append(" ");
+        while (operations.size() > 0)
+            output.append(operations.pop()).append(" ");
 
         return output.toString();
+    }
+
+    private void checkWhitespacesInsideNumber(String input, int i) {
+        i++;
+        while (i < input.length() && isDelimeter(input.charAt(i))) {
+            i++;
+        }
+
+        if (i < input.length() && !isOperator(input.charAt(i))) {
+            throw new IllegalArgumentException("Not valid input data. Whitespaces inside number");
+        }
     }
 
     private boolean isNumber(String input, int i) {
@@ -135,7 +140,6 @@ public class Calculator {
         }
         return false;
     }
-
 
     private boolean isDelimeter(char c) {
         return "= ".indexOf(c) != -1;
@@ -197,7 +201,7 @@ public class Calculator {
                     a = temp.pop();
                     b = temp.pop();
                 } catch (EmptyStackException e) {
-                    throw new IllegalArgumentException("Invalid data");
+                    throw new IllegalArgumentException("Not valid input data");
                 }
 
                 switch (input.charAt(i)) {
