@@ -5,6 +5,7 @@ import ch.obermuhlner.math.big.BigDecimalMath;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.util.EmptyStackException;
 import java.util.Scanner;
 import java.util.Stack;
 
@@ -13,7 +14,11 @@ public class Calculator {
     public static final MathContext DEFAULT_MATH_CONTEXT = new MathContext(100);
 
     public static void main(String[] args) throws IOException {
-        System.out.println("Enter \'exit\' for quite:");
+        new Calculator().startCalculator();
+    }
+
+    private void startCalculator() {
+        System.out.println("Enter \'exit\' for program exit.");
         Scanner scanner = new Scanner(System.in);
         while (true) {
             try {
@@ -34,13 +39,13 @@ public class Calculator {
     }
 
 
-    static public BigDecimal calculate(String input) {
+    private BigDecimal calculate(String input) {
         String output = getExpression(input);
         return counting(output);
     }
 
 
-    static private String getExpression(String input) {
+    private String getExpression(String input) {
         StringBuilder output = new StringBuilder();
         Stack<Character> operStack = new Stack<>();
 
@@ -109,14 +114,18 @@ public class Calculator {
         return output.toString();
     }
 
-    private static boolean isNumber(String input, int i) {
+    private boolean isNumber(String input, int i) {
         if ('-' == input.charAt(i)) {
-            i++;
+            if (i > 0)
+                i--;
             while (isDelimeter(input.charAt(i))) {
-                if (i >= input.length()) return false;
-                i++;
+                if (i > 0) {
+                    i--;
+                } else {
+                    return false;
+                }
             }
-            if (Character.isDigit(input.charAt(i))) {
+            if (isOperator(input.charAt(i))) {
                 return true;
             }
         } else {
@@ -128,21 +137,15 @@ public class Calculator {
     }
 
 
-    static private boolean isDelimeter(char c) {
-        if ((" =".indexOf(c) != -1))
-            return true;
-        return false;
+    private boolean isDelimeter(char c) {
+        return "= ".indexOf(c) != -1;
     }
 
-
-    static private boolean isOperator(char с) {
-        if (("+-/*^()".indexOf(с) != -1))
-            return true;
-        return false;
+    private boolean isOperator(char с) {
+        return "+-/*^()".indexOf(с) != -1;
     }
 
-
-    static private byte getPriority(char s) {
+    private byte getPriority(char s) {
         switch (s) {
             case '(':
                 return 0;
@@ -164,13 +167,13 @@ public class Calculator {
     }
 
 
-    static private BigDecimal counting(String input) {
+    private BigDecimal counting(String input) {
         BigDecimal result = BigDecimal.ZERO;
         Stack<BigDecimal> temp = new Stack<>();
 
         for (int i = 0; i < input.length(); i++) {
 
-            if (isNumber(input, i)) {
+            if (isNumberInReversePolishNotation(input, i)) {
                 StringBuilder numberBuilder = new StringBuilder();
 
                 if (input.charAt(i) == '-') {
@@ -188,8 +191,14 @@ public class Calculator {
                 i--;
             } else if (isOperator(input.charAt(i))) {
 
-                BigDecimal a = temp.pop();
-                BigDecimal b = temp.pop();
+                BigDecimal a;
+                BigDecimal b;
+                try {
+                    a = temp.pop();
+                    b = temp.pop();
+                } catch (EmptyStackException e) {
+                    throw new IllegalArgumentException("Invalid data");
+                }
 
                 switch (input.charAt(i)) {
                     case '+':
@@ -215,6 +224,24 @@ public class Calculator {
             }
         }
         return temp.peek();
+    }
+
+    private boolean isNumberInReversePolishNotation(String input, int i) {
+        if ('-' == input.charAt(i)) {
+            if (i < input.length() - 1) {
+                i++;
+                if (Character.isDigit(input.charAt(i))) {
+                    return true;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            if (Character.isDigit(input.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

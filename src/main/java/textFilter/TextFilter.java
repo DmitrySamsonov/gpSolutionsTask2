@@ -13,7 +13,7 @@ public class TextFilter {
     }
 
     private void executeTextFiltering(String[] args) {
-        System.out.println("Enter \'exit\' for quite:");
+        System.out.println("Enter \'exit\' for program exit.");
         Scanner scanner = new Scanner(System.in);
         List<String> strings = new LinkedList<>();
         boolean exit;
