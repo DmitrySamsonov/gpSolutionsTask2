@@ -11,7 +11,7 @@ import java.util.Stack;
 
 public class Calculator {
 
-    public static final MathContext DEFAULT_MATH_CONTEXT = new MathContext(100);
+    private static final MathContext DEFAULT_MATH_CONTEXT = new MathContext(100);
 
     public static void main(String[] args) throws IOException {
         new Calculator().startCalculator();
@@ -39,7 +39,7 @@ public class Calculator {
     }
 
 
-    private BigDecimal calculate(String inputDataString) {
+    public BigDecimal calculate(String inputDataString) {
         String reversePolishNotation = computeReversePolishNotation(inputDataString);
         return counting(reversePolishNotation);
     }
